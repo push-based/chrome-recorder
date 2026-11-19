@@ -31,7 +31,7 @@ from Puppeteer or Playwright; this extension runs them through
 
 ## Use it
 
-1. Build it (below) and load `.output/chrome-mv3` in `chrome://extensions`
+1. Build it (below) and load `dist/chrome-mv3` in `chrome://extensions`
    with **Developer mode** on and **Load unpacked**.
 2. Click the toolbar icon to open the side panel.
 3. Pick a source, frame rate, maximum size and whether to record audio, then
@@ -59,7 +59,7 @@ Needs Node 22.18+ and pnpm.
 ```sh
 pnpm install
 pnpm dev          # Chrome with the extension loaded and hot reload
-pnpm build        # .output/chrome-mv3
+pnpm build        # dist/chrome-mv3
 pnpm zip          # zip for the Chrome Web Store
 pnpm compile      # type check
 pnpm lint         # oxlint, including the anti-slop rules
