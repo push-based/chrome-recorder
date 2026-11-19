@@ -1,0 +1,67 @@
+{
+  "name": "chrome-recorder",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Chrome extension that records the current tab with Chrome's native AV1 recorder (Page.startScreenRecording), or any screen or window, from a side panel",
+  "keywords": [
+    "av1",
+    "chrome-extension",
+    "devtools-protocol",
+    "mp4",
+    "screen-recorder",
+    "screen-recording",
+    "side-panel",
+    "tab-recording"
+  ],
+  "homepage": "https://github.com/push-based/chrome-recorder#readme",
+  "bugs": {
+    "url": "https://github.com/push-based/chrome-recorder/issues"
+  },
+  "license": "Apache-2.0",
+  "author": {
+    "name": "PushBased",
+    "url": "https://push-based.io"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/push-based/chrome-recorder.git"
+  },
+  "type": "module",
+  "scripts": {
+    "dev": "wxt",
+    "dev:firefox": "wxt -b firefox",
+    "build": "wxt build",
+    "build:firefox": "wxt build -b firefox",
+    "zip": "wxt zip",
+    "zip:firefox": "wxt zip -b firefox",
+    "compile": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "e2e": "wxt build && playwright test",
+    "e2e:ui": "wxt build && playwright test --ui",
+    "postinstall": "wxt prepare",
+    "lint": "oxlint",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check"
+  },
+  "dependencies": {
+    "@fontsource-variable/geist": "5.3.0",
+    "@fontsource-variable/geist-mono": "5.3.0"
+  },
+  "devDependencies": {
+    "@oxlint/plugins": "1.88.0",
+    "@playwright/test": "^1.64.1",
+    "jsdom": "^30.1.2",
+    "oxfmt": "0.73.0",
+    "oxlint": "1.88.0",
+    "typescript": "^5.9.3",
+    "vite": "^8.1.5",
+    "vitest": "^5.0.4",
+    "web-ext": "^10.5.0",
+    "wxt": "^0.21.3"
+  },
+  "engines": {
+    "node": ">=22.18"
+  },
+  "packageManager": "pnpm@10.34.7"
+}

@@ -1,0 +1,6 @@
+Chrome Recorder
+Copyright 2026 push-based.io
+
+The native tab recording uses the same Chrome DevTools Protocol calls as
+chrome-capture by Paul Irish (https://github.com/paulirish/chrome-capture),
+Copyright 2026 Google LLC, licensed under the Apache License, Version 2.0.

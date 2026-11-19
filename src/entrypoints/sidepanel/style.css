@@ -1,0 +1,440 @@
+/*
+ * Chrome Recorder side panel. Colours, type, spacing and radius come from the
+ * PushBased design tokens in tokens.css; this file only maps them to roles.
+ */
+
+@import './tokens.css';
+
+:root {
+  color-scheme: light dark;
+
+  /* fonts.css registers the self-hosted faces as "Geist Variable" and
+     "Geist Mono Variable"; the token stacks name the plain families. */
+  --font-sans: 'Geist Variable', var(--font-family-sans);
+  --font-mono: 'Geist Mono Variable', var(--font-family-mono);
+  --font-title: 'Geist Mono Variable', var(--text-subtitle-font-family);
+
+  --bg: var(--color-neutral-25);
+  --fg: var(--color-neutral-900);
+  --muted: var(--color-neutral-600);
+  --surface: var(--color-neutral-100);
+  --line: var(--color-neutral-200);
+  --grid: var(--color-neutral-300);
+
+  --accent: var(--color-primary-600);
+  --accent-hover: var(--color-primary-700);
+  --accent-fg: var(--color-neutral-25);
+  --focus: var(--color-primary-500);
+  --selection: var(--color-primary-100);
+
+  --rec: var(--color-secondary-600);
+  --rec-hover: var(--color-secondary-700);
+
+  /* Status colours double as text colours, so they hold 4.5:1 on --bg. */
+  --good: var(--color-success-700);
+  --needs-improvement: var(--color-warning-700);
+  --poor: var(--color-error-600);
+
+  --logo-base: var(--color-primary-950);
+  --logo-accent: var(--color-secondary-600);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: var(--color-neutral-950);
+    --fg: var(--color-neutral-50);
+    --muted: var(--color-neutral-400);
+    --surface: var(--color-neutral-900);
+    --line: var(--color-neutral-800);
+    --grid: var(--color-neutral-700);
+
+    /* Purple burns on dark surfaces: stay in the 200–400 range. */
+    --accent: var(--color-primary-300);
+    --accent-hover: var(--color-primary-200);
+    --accent-fg: var(--color-neutral-950);
+    --focus: var(--color-primary-400);
+    --selection: var(--color-primary-900);
+
+    --rec: var(--color-secondary-500);
+    --rec-hover: var(--color-secondary-400);
+
+    --good: var(--color-success-400);
+    --needs-improvement: var(--color-warning-400);
+    --poor: var(--color-error-400);
+
+    --logo-base: var(--color-neutral-50);
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+  margin: 0;
+  min-width: 260px;
+  scrollbar-color: var(--grid) transparent;
+}
+
+::selection {
+  background: var(--selection);
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+code {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+}
+
+/* Qualifiers like "(this session)": quieter, never synthetic italics.
+   Always body type, even inside a mono title. */
+em {
+  color: var(--muted);
+  font-family: var(--font-sans);
+  font-style: normal;
+  font-weight: var(--font-weight-regular);
+}
+
+/* Channel titles use the brand subtitle style. */
+legend,
+h2 {
+  font-family: var(--font-title);
+  font-size: var(--text-subtitle-font-size);
+  font-weight: var(--text-subtitle-font-weight);
+  line-height: var(--text-subtitle-line-height);
+}
+
+/* --- Status bar ------------------------------------------------------------ */
+
+.status {
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  gap: var(--space-2);
+  min-height: var(--space-11);
+  padding: var(--space-2) var(--space-4);
+}
+.status-dot {
+  background: var(--muted);
+  border-radius: var(--radius-full);
+  flex: none;
+  height: var(--space-2);
+  width: var(--space-2);
+}
+.status[data-state='idle'] .status-dot {
+  background: var(--good);
+}
+.status[data-state='busy'] .status-dot {
+  background: var(--needs-improvement);
+}
+.status[data-state='recording'] .status-dot {
+  animation: blink 1s steps(1, end) infinite;
+  background: var(--rec);
+}
+.status[data-state='error'] .status-dot {
+  background: var(--poor);
+}
+@keyframes blink {
+  50% {
+    opacity: 0.25;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .status[data-state='recording'] .status-dot {
+    animation: none;
+  }
+}
+.status-text {
+  color: var(--muted);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.elapsed {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Status bar and credit stay put; in a short panel main scrolls between them. */
+main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-4);
+}
+
+/* --- Setup ---------------------------------------------------------------- */
+
+.setup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.modes {
+  border: 0;
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+}
+legend {
+  margin-bottom: var(--space-2);
+  padding: 0;
+}
+.mode {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  display: grid;
+  gap: 0 var(--space-2);
+  grid-template-columns: auto 1fr;
+  padding: var(--space-3);
+  transition: border-color 0.15s ease-out;
+}
+.mode:has(input:checked) {
+  border-color: var(--accent);
+}
+.mode:has(input:disabled) {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+.mode input {
+  accent-color: var(--accent);
+  grid-row: span 2;
+  margin: var(--space-px) 0 0;
+}
+.mode-title {
+  font-weight: var(--font-weight-medium);
+}
+.mode-detail {
+  color: var(--muted);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-xs);
+}
+
+.options {
+  align-items: end;
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.field span {
+  color: var(--muted);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-xs);
+}
+select {
+  background: var(--bg);
+  border: 1px solid var(--grid);
+  border-radius: var(--radius-md);
+  color: var(--fg);
+  font: inherit;
+  padding: var(--space-1) var(--space-2);
+}
+.checkbox {
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  gap: var(--space-2);
+  grid-column: 1 / -1;
+}
+.checkbox input {
+  accent-color: var(--accent);
+  margin: 0;
+}
+fieldset:disabled,
+.options:has(:disabled) {
+  opacity: 0.6;
+}
+
+.hint {
+  color: var(--muted);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-xs);
+  margin: 0;
+}
+
+.record-button {
+  align-items: center;
+  background: var(--rec);
+  border: 0;
+  border-radius: var(--radius-lg);
+  color: var(--color-neutral-25);
+  cursor: pointer;
+  display: flex;
+  font: inherit;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  gap: var(--space-2);
+  justify-content: center;
+  padding: var(--space-3) var(--space-4);
+  transition: background-color 0.15s ease-out;
+}
+.record-button:hover {
+  background: var(--rec-hover);
+}
+.record-button:disabled {
+  cursor: progress;
+  opacity: 0.7;
+}
+.record-icon {
+  background: currentColor;
+  border-radius: var(--radius-full);
+  height: var(--space-3);
+  width: var(--space-3);
+}
+.record-button[data-state='recording'] {
+  background: var(--fg);
+  color: var(--bg);
+}
+.record-button[data-state='recording'] .record-icon {
+  border-radius: var(--radius-sm);
+}
+
+.error {
+  background: color-mix(in srgb, var(--poor) 10%, transparent);
+  border-left: 3px solid var(--poor);
+  border-radius: var(--radius-base);
+  color: var(--poor);
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+}
+
+/* --- Recordings ------------------------------------------------------------ */
+
+.recordings h2 {
+  margin: 0 0 var(--space-3);
+}
+.recordings ul {
+  display: grid;
+  gap: var(--space-3);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.recording {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  display: grid;
+  gap: var(--space-2);
+  overflow: hidden;
+  padding-bottom: var(--space-3);
+}
+.recording video {
+  aspect-ratio: 16 / 9;
+  background: var(--color-neutral-950);
+  display: block;
+  width: 100%;
+}
+.recording-name,
+.recording-meta,
+.recording-actions {
+  padding: 0 var(--space-3);
+}
+.recording-name {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  overflow-wrap: anywhere;
+}
+.recording-meta {
+  color: var(--muted);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-xs);
+}
+.recording-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.recording-actions button {
+  background: transparent;
+  border: 1px solid var(--grid);
+  border-radius: var(--radius-md);
+  color: var(--fg);
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--font-size-xs);
+  padding: var(--space-1) var(--space-2);
+}
+.recording-actions button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.recordings .empty {
+  color: var(--muted);
+  margin: var(--space-4) 0;
+  text-align: center;
+}
+.recordings:has(li) .empty {
+  display: none;
+}
+
+/* --- Credit ---------------------------------------------------------------- */
+
+/* Quiet maker's mark: muted until hovered, the logo keeps its brand colours. */
+.credit {
+  border-top: 1px solid var(--line);
+  display: flex;
+  justify-content: center;
+  padding: var(--space-2) var(--space-4);
+}
+.credit a {
+  align-items: center;
+  border-radius: var(--radius-sm);
+  color: var(--muted);
+  display: inline-flex;
+  font-size: var(--font-size-xs);
+  gap: var(--space-1);
+  line-height: var(--line-height-xs);
+  text-decoration: none;
+  transition: color 0.15s ease-out;
+}
+.credit a:hover {
+  color: var(--fg);
+}
+.credit-heart {
+  color: var(--accent);
+}
+.credit-logo {
+  height: var(--space-3);
+  margin-left: var(--space-px);
+  width: auto;
+}
+.credit-logo-base {
+  fill: var(--logo-base);
+}
+.credit-logo-accent {
+  fill: var(--logo-accent);
+}
+.credit-name {
+  font-weight: var(--font-weight-medium);
+}
