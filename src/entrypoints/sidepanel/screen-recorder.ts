@@ -55,20 +55,29 @@ export class ScreenRecorder {
 
     const stream = await navigator.mediaDevices.getDisplayMedia(request);
     const mimeType = pickMimeType((type) => MediaRecorder.isTypeSupported(type));
+    let recorder: MediaRecorder;
 
-    const recorder = new MediaRecorder(stream, {
-      mimeType,
-      videoBitsPerSecond: videoBitrate(options.resolution, options.frameRate),
-    });
+    try {
+      recorder = new MediaRecorder(stream, {
+        mimeType,
+        videoBitsPerSecond: videoBitrate(options.resolution, options.frameRate),
+      });
 
-    this.#chunks = [];
-    recorder.addEventListener('dataavailable', (event) => {
-      if (event.data.size > 0) this.#chunks.push(event.data);
-    });
+      this.#chunks = [];
+      recorder.addEventListener('dataavailable', (event) => {
+        if (event.data.size > 0) this.#chunks.push(event.data);
+      });
+
+      // A timeslice keeps memory flowing into chunks instead of one huge buffer.
+      recorder.start(1000);
+    } catch (error) {
+      // Stop sharing, or Chrome keeps showing the capture as live.
+      for (const track of stream.getTracks()) track.stop();
+
+      throw error;
+    }
+
     stream.getVideoTracks()[0]?.addEventListener('ended', onEnded, { once: true });
-
-    // A timeslice keeps memory flowing into chunks instead of one huge buffer.
-    recorder.start(1000);
     this.#stream = stream;
     this.#recorder = recorder;
   }

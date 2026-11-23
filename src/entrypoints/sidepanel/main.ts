@@ -85,6 +85,17 @@ toggle.addEventListener('click', () => {
   else void startRecording();
 });
 
+// Closing the panel ends this page, and a screen recording with it. A tab
+// recording would keep running in Chrome with nothing left to stop it, so let
+// go of the tab, and clear the badge either way.
+window.addEventListener('pagehide', () => {
+  if (!activeMode) return;
+
+  if (activeMode === 'tab') tabRecorder.abandon();
+
+  void setBadge(false);
+});
+
 async function startRecording(): Promise<void> {
   const settings = readSettings();
   const resolution = RESOLUTIONS[settings.resolution];
@@ -342,7 +353,8 @@ function describeError(error: unknown): string {
     return 'Chrome doesn’t allow recording its own pages. Switch to a website tab, or use Screen or window.';
   }
 
-  return message;
+  // An empty message would leave the error box hidden and the failure silent.
+  return message || 'Something went wrong. Try again.';
 }
 
 function button(label: string): HTMLButtonElement {
