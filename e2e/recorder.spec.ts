@@ -65,3 +65,25 @@ test('remembers the chosen settings', async ({ context, openPanel }) => {
   await expect(panel.getByLabel('Screen or window')).toBeChecked();
   await expect(panel.getByLabel('Frame rate')).toHaveValue('30');
 });
+
+test('lets go of the tab when the panel closes mid-recording', async ({ context, openPanel }) => {
+  const site = await context.newPage();
+
+  await site.goto(`${SITE}/`);
+
+  const panel = await openPanel(site);
+
+  await panel.getByLabel('This tab').check();
+  await panel.getByRole('button', { name: 'Start recording' }).click();
+  await expect(panel.locator('#status')).toHaveAttribute('data-state', 'recording');
+  await panel.close();
+
+  // A fresh panel can record the same tab again, so the old session is gone.
+  const next = await openPanel(site);
+
+  await next.getByRole('button', { name: 'Start recording' }).click();
+  await expect(next.locator('#status')).toHaveAttribute('data-state', 'recording');
+  await next.getByRole('button', { name: 'Stop recording' }).click();
+  await expect(next.locator('.recording').first()).toBeVisible({ timeout: 15_000 });
+  await expect(next.locator('#error')).toBeHidden();
+});

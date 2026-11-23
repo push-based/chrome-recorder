@@ -62,7 +62,7 @@ export class TabRecorder {
   ): Promise<void> {
     const target: Browser.debugger.Debuggee = { tabId };
 
-    await browser.debugger.attach(target, PROTOCOL_VERSION);
+    await attach(target);
 
     try {
       await browser.debugger.sendCommand(target, 'Page.startScreenRecording', {
@@ -104,6 +104,38 @@ export class TabRecorder {
     } finally {
       await browser.debugger.detach(target).catch(() => {});
     }
+  }
+
+  /**
+   * Lets go of the tab without waiting for the video, for when the panel is
+   * closing mid-recording. Detaching ends Chrome's recording and removes the
+   * "started debugging this browser" bar; the video is lost.
+   */
+  abandon(): void {
+    const target = this.#target;
+
+    if (!target) return;
+
+    this.#target = undefined;
+    browser.debugger.onDetach.removeListener(this.#handleDetach);
+    browser.debugger.detach(target).catch(() => {});
+  }
+}
+
+/**
+ * Attaches to the tab. If this extension is still attached from a panel that
+ * closed mid-recording, that stale session is dropped and the tab taken back.
+ * The error only ever concerns this extension's own session: other debuggers
+ * (DevTools, other extensions) can share the tab.
+ */
+async function attach(target: Browser.debugger.Debuggee): Promise<void> {
+  try {
+    await browser.debugger.attach(target, PROTOCOL_VERSION);
+  } catch (error) {
+    if (!(error instanceof Error) || !/already attached/i.test(error.message)) throw error;
+
+    await browser.debugger.detach(target);
+    await browser.debugger.attach(target, PROTOCOL_VERSION);
   }
 }
 
